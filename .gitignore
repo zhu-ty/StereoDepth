@@ -1,0 +1,9 @@
+.vscode
+build/
+*.asv
+
+*.png
+*.jpg
+*.jpeg
+
+*__ignore__*
