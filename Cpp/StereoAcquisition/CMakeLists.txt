@@ -1,0 +1,104 @@
+
+
+set(stereo_exe_name "StereoAcquisition")
+
+# Camera Driver files
+# camera SDK
+# pointgrey camera sdk
+if ( WIN32 )
+    set(PTGREY_SDK_INCLUDE_DIR "C:/Program Files/Point Grey Research/Spinnaker/include")
+	set(PTGREY_SDK_LIBRARY_DEBUG debug "C:/Program Files/Point Grey Research/Spinnaker/lib64/vs2015/Spinnakerd_v140.lib")
+	set(PTGREY_SDK_LIBRARY_RELEASE  optimized "C:/Program Files/Point Grey Research/Spinnaker/lib64/vs2015/Spinnaker_v140.lib")
+else()
+    set(PTGREY_SDK_INCLUDE_DIR "~/zhu-ty/spinnaker/include")
+    set(PTGREY_SDK_LIBRARY_DEBUG debug "~/zhu-ty/spinnaker/lib/libSpinnaker.so")
+    set(PTGREY_SDK_LIBRARY_RELEASE optimized "~/zhu-ty/spinnaker/lib/libSpinnaker.so")
+endif()
+include_directories(${PTGREY_SDK_INCLUDE_DIR})
+
+# XIMEA camera
+if ( WIN32 )
+    set(XIMEA_SDK_INCLUDE_DIR "C:/XIMEA/API")
+    set(XIMEA_SDK_LIBRARY_DEBUG debug "C:/XIMEA/API/x64/xiapi64.lib")
+    set(XIMEA_SDK_LIBRARY_RELEASE optimized "C:/XIMEA/API/x64/xiapi64.lib")
+else ()
+    set(XIMEA_SDK_INCLUDE_DIR "/opt/XIMEA/include")
+    set(XIMEA_SDK_LIBRARY_DEBUG debug "/usr/lib/libm3api.so")
+    set(XIMEA_SDK_LIBRARY_RELEASE optimized "/usr/lib/libm3api.so")
+endif()
+include_directories(${XIMEA_SDK_INCLUDE_DIR})
+include_directories(${XIMEA_SDK_INCLUDE_DIR})
+
+# General camera driver
+set(CAMERA_DRIVER_DIR ${PROJECT_SOURCE_DIR}/GenCameraDriver)
+set(CAMERA_DRIVER_FILE
+	${CAMERA_DRIVER_DIR}/XIMEA/XIMEACamera.h
+	${CAMERA_DRIVER_DIR}/FileCamera/FileCamera.h
+	${CAMERA_DRIVER_DIR}/PointGrey/PointGreyCamera.h
+	${CAMERA_DRIVER_DIR}/GenCameraDriver.h
+	${CAMERA_DRIVER_DIR}/RealCameraDriver.h
+	${CAMERA_DRIVER_DIR}/NPPJpegCoder.h
+	${CAMERA_DRIVER_DIR}/XIMEA/XIMEACamera.cpp
+	${CAMERA_DRIVER_DIR}/FileCamera/FileCamera.cpp
+	${CAMERA_DRIVER_DIR}/PointGrey/PointGreyCamera.cpp
+	${CAMERA_DRIVER_DIR}/GenCameraDriver.cpp
+	${CAMERA_DRIVER_DIR}/GenCameraDriverImpl.cpp
+	${CAMERA_DRIVER_DIR}/RealCameraDriver.cpp
+	${CAMERA_DRIVER_DIR}/NPPJpegCoder.cpp
+)
+set(CAMERA_DRIVER_LIB
+	${PTGREY_SDK_LIBRARY}
+	${XIMEA_SDK_LIBRARY}
+)
+include_directories(
+	${CAMERA_DRIVER_DIR}
+	${PTGREY_SDK_INCLUDE_DIR}
+	${XIMEA_SDK_INCLUDE_DIR}
+)
+
+
+
+# C++ header file
+set(MY_HEADER_FILES
+    # C++ header file
+	#${PROJECT_SOURCE_DIR}/Common/SysUtil.hpp
+	${COMMON_HEADER_FILES}
+    StereoAcquisition.h
+)
+
+set(MY_SOURCE_FILES 
+	# C++ code
+    StereoAcquisition.cpp
+    StereoAcquisition.cu
+	${CAMERA_DRIVER_FILE}
+)
+
+cuda_add_executable(${stereo_exe_name}
+    ${MY_HEADER_FILES}
+    ${MY_SOURCE_FILES}
+    main.cpp
+)
+
+target_link_libraries(${stereo_exe_name}
+    # OpenCV
+    ${OpenCV_LIBS}
+    # cuda libs
+    ${CUDA_LIBRARY} 	
+	${CUDA_npp_LIBRARY} 
+	${CUDA_nppc_LIBRARY} 
+	${CUDA_nppicc_LIBRARY}
+	${CUDA_nppicom_LIBRARY}
+	${CUDA_nppidei_LIBRARY}
+	${CUDA_nppif_LIBRARY}
+	${CUDA_nppig_LIBRARY}
+	${CUDA_nppim_LIBRARY}
+	${CUDA_nppist_LIBRARY}
+	${CUDA_nppisu_LIBRARY}
+	${CUDA_nppitc_LIBRARY}
+	${CUDA_npps_LIBRARY} 
+	# camera libs
+	${PTGREY_SDK_LIBRARY_DEBUG}
+	${PTGREY_SDK_LIBRARY_RELEASE}
+	${XIMEA_SDK_LIBRARY_DEBUG}
+	${XIMEA_SDK_LIBRARY_RELEASE}
+)
