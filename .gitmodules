@@ -1,0 +1,3 @@
+[submodule "Cpp/GenCameraDriver"]
+	path = Cpp/GenCameraDriver
+	url = https://github.com/yuanxy92/GenCameraDriver
