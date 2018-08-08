@@ -31,21 +31,35 @@ include_directories(${XIMEA_SDK_INCLUDE_DIR})
 
 # General camera driver
 set(CAMERA_DRIVER_DIR ${PROJECT_SOURCE_DIR}/GenCameraDriver)
-set(CAMERA_DRIVER_FILE
-	${CAMERA_DRIVER_DIR}/XIMEA/XIMEACamera.h
-	${CAMERA_DRIVER_DIR}/FileCamera/FileCamera.h
-	${CAMERA_DRIVER_DIR}/PointGrey/PointGreyCamera.h
-	${CAMERA_DRIVER_DIR}/GenCameraDriver.h
-	${CAMERA_DRIVER_DIR}/RealCameraDriver.h
-	${CAMERA_DRIVER_DIR}/NPPJpegCoder.h
-	${CAMERA_DRIVER_DIR}/XIMEA/XIMEACamera.cpp
-	${CAMERA_DRIVER_DIR}/FileCamera/FileCamera.cpp
-	${CAMERA_DRIVER_DIR}/PointGrey/PointGreyCamera.cpp
-	${CAMERA_DRIVER_DIR}/GenCameraDriver.cpp
-	${CAMERA_DRIVER_DIR}/GenCameraDriverImpl.cpp
-	${CAMERA_DRIVER_DIR}/RealCameraDriver.cpp
-	${CAMERA_DRIVER_DIR}/NPPJpegCoder.cpp
-)
+
+file(GLOB_RECURSE CAMERA_DRIVER_FILE_CPP ${CAMERA_DRIVER_DIR}/*.cpp)
+file(GLOB_RECURSE CAMERA_DRIVER_FILE_CU ${CAMERA_DRIVER_DIR}/*.cu)
+file(GLOB_RECURSE CAMERA_DRIVER_FILE_H ${CAMERA_DRIVER_DIR}/*.h)
+file(GLOB_RECURSE CAMERA_DRIVER_FILE_HPP ${CAMERA_DRIVER_DIR}/*.hpp)
+
+set(CAMERA_DRIVER_FILE 
+${CAMERA_DRIVER_FILE_CPP}
+${CAMERA_DRIVER_FILE_CU}
+${CAMERA_DRIVER_FILE_H}
+${CAMERA_DRIVER_FILE_HPP})
+
+list(REMOVE_ITEM CAMERA_DRIVER_FILE ${CAMERA_DRIVER_DIR}/main.cpp)
+
+# set(CAMERA_DRIVER_FILE
+# 	${CAMERA_DRIVER_DIR}/XIMEA/XIMEACamera.h
+# 	${CAMERA_DRIVER_DIR}/FileCamera/FileCamera.h
+# 	${CAMERA_DRIVER_DIR}/PointGrey/PointGreyCamera.h
+# 	${CAMERA_DRIVER_DIR}/GenCameraDriver.h
+# 	${CAMERA_DRIVER_DIR}/RealCameraDriver.h
+# 	${CAMERA_DRIVER_DIR}/NPPJpegCoder.h
+# 	${CAMERA_DRIVER_DIR}/XIMEA/XIMEACamera.cpp
+# 	${CAMERA_DRIVER_DIR}/FileCamera/FileCamera.cpp
+# 	${CAMERA_DRIVER_DIR}/PointGrey/PointGreyCamera.cpp
+# 	${CAMERA_DRIVER_DIR}/GenCameraDriver.cpp
+# 	${CAMERA_DRIVER_DIR}/GenCameraDriverImpl.cpp
+# 	${CAMERA_DRIVER_DIR}/RealCameraDriver.cpp
+# 	${CAMERA_DRIVER_DIR}/NPPJpegCoder.cpp
+# )
 set(CAMERA_DRIVER_LIB
 	${PTGREY_SDK_LIBRARY}
 	${XIMEA_SDK_LIBRARY}

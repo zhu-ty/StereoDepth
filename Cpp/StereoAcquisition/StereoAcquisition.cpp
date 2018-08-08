@@ -11,7 +11,7 @@ Online stereo calibration class
 
 #include "SysUtil.hpp"
 #include <opencv2/core/utility.hpp>
-#include "StereoCalibration.h"
+#include "StereoAcquisition.h"
 
 StereoCalibration::StereoCalibration() : chessBoardSize(11, 8), validFrameInd(0) {}
 StereoCalibration::~StereoCalibration() {}

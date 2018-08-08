@@ -5,7 +5,7 @@ Online Stereo Image Capture
 @date Apr 24, 2018
 */
 
-#include "StereoCalibration.h"
+#include "StereoAcquisition.h"
 
 #include "NPPJpegCoder.h"
 #include "GenCameraDriver.h"
