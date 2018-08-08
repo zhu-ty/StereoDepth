@@ -83,7 +83,7 @@ ${headers_hpp}
 
 # add sub-directory
 add_subdirectory("DisparityWarping")
-add_subdirectory("GenCameraDriver")
+# add_subdirectory("GenCameraDriver")
 add_subdirectory("ImageRectify")
 add_subdirectory("StereoAcquisition")
 add_subdirectory("StereoCalibration")

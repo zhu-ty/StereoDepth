@@ -7,6 +7,7 @@
 set(depth_exe_name "ImageRectify")
 
 add_executable(${depth_exe_name}
+    ${COMMON_HEADER_FILES}
     StereoRectify.h
     StereoRectify.cpp
     main.cpp

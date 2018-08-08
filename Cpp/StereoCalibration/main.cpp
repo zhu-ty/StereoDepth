@@ -1,3 +1,7 @@
+//Param Sample
+//-w=11 -h=8 -s=30 E:/Projects/LightFieldGiga/LightFieldCalibration/StereoCameraCalibration/images.xml
+
+
 /* This is sample from the OpenCV book. The copyright notice is below */
 
 /* *************** License:**************************
