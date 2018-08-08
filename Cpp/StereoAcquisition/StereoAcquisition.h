@@ -48,12 +48,12 @@ public:
 	int init(cv::Mat K1, cv::Mat K2, cv::Size chessBoardSize);
 
 	/**
-	@brief estimate extrinsic matrix in real time
+	@brief save image in real time & show
 	@param cv::Mat img1: input image of the first camera
 	@param cv::Mat img2: input image of the second camera
 	@return int
 	*/
-	int estimate(cv::Mat img1, cv::Mat img2);
+	int SaveImg(cv::Mat img1, cv::Mat img2);
 
 	static cv::cuda::GpuMat applyWhiteBalance(cv::cuda::GpuMat img,
 		float red, float green, float blue);

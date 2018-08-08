@@ -1,6 +1,6 @@
 /**
 @brief main.cpp
-Online stereo calibration main file
+Online Stereo Image Capture
 @author Shane Yuan
 @date Apr 24, 2018
 */
@@ -12,20 +12,7 @@ Online stereo calibration main file
 
 #include "SysUtil.hpp"
 
-//cv::Mat colorBGR2BayerRG(cv::Mat img) {
-//	cv::Mat out(img.rows, img.cols, CV_8U);
-//	size_t rows = img.rows / 2;
-//	size_t cols = img.cols / 2;
-//	for (size_t row = 0; row < rows; row++) {
-//		for (size_t col = 0; col < cols; col++) {
-//			out.at<uchar>(row * 2, col * 2) = img.at<cv::Vec3b>(row * 2, col * 2).val[1];
-//			out.at<uchar>(row * 2, col * 2 + 1) = img.at<cv::Vec3b>(row * 2, col * 2 + 1).val[2];
-//			out.at<uchar>(row * 2 + 1, col * 2) = img.at<cv::Vec3b>(row * 2 + 1, col * 2).val[0];
-//			out.at<uchar>(row * 2 + 1, col * 2 + 1) = img.at<cv::Vec3b>(row * 2 + 1, col * 2 + 1).val[1];
-//		}
-//	}
-//	return out;
-//}
+//TODO 这个项目本来是实时采集和标定的，现在只剩下采集的功能，因为实时标定太慢了，故将两个流程分开
 
 int main(int argc, char* argv[]) {
 	std::vector<cam::GenCamInfo> camInfos;
@@ -92,73 +79,13 @@ int main(int argc, char* argv[]) {
 
 		imgs_d[0].download(imgs_c[0]);
 		imgs_d[1].download(imgs_c[1]);
-#if 0
-		if (nframe == 1) {
-			cv::Mat img;
-			cv::Size sizeSmall(imgs_c[0].cols / 4, imgs_c[0].rows / 4);
-			cv::resize(imgs_c[0], img, sizeSmall);
-			rect = cv::selectROI(img, true);
-			rect.x *= 4;
-			rect.y *= 4;
-			rect.width *= 4;
-			rect.height *= 4;
-		}
-		else {
-			cv::Mat img1, img2;
-			imgs_c[0](rect).copyTo(img1);
-			imgs_c[1](rect).copyTo(img2);
-			cv::Mat showImg(img1.rows, img1.cols * 2, CV_8UC3);
-			cv::Rect rect2(0, 0, img1.cols, img1.rows);
-			img1.copyTo(showImg(rect2));
-			rect2.x += img1.cols;
-			img2.copyTo(showImg(rect2));
-			cv::line(showImg, cv::Point(0, showImg.rows / 2), 
-				cv::Point(showImg.cols, showImg.rows / 2), cv::Scalar(0, 0, 255), 1, 8, 0);
-			cv::line(showImg, cv::Point(showImg.cols / 4, 0),
-				cv::Point(showImg.cols / 4, showImg.rows), cv::Scalar(0, 0, 255), 1, 8, 0);
-			cv::line(showImg, cv::Point(showImg.cols / 4 * 3, 0),
-				cv::Point(showImg.cols / 4 * 3, showImg.rows), cv::Scalar(0, 0, 255), 1, 8, 0);
-			cv::resize(showImg, showImg, cv::Size(showImg.size().width * 3,
-				showImg.size().height * 3));
-			cv::imshow("calib", showImg);
-			cv::waitKey(5);
-			cv::Mat result;
-			cv::matchTemplate(img1, img2, result, cv::TM_CCOEFF_NORMED);
-			system("cls");
-			printf("Current zncc: %f\n", result.at<float>(0, 0));
-		}
-#else
-		stereoCalibrator.estimate(imgs_c[0], imgs_c[1]);
-#endif
+
+		stereoCalibrator.SaveImg(imgs_c[0], imgs_c[1]);
 		SysUtil::sleep(5);
 	}
 
 	cameraPtr->stopCaptureThreads();
 	cameraPtr->release();
-
-	//int width = 4112;
-	//int height = 3008;
-	////int width = 4112;
-	////int height = 3008;
-	//cv::Mat img = cv::imread("raw.ref.bmp");
-	//img(cv::Rect(0, 0, width, height)).copyTo(img);
-	//cv::Mat bayerImg = colorBGR2BayerRG(img);
-	//cv::cuda::GpuMat img_d(3000, 4000, CV_8U);
-	//img_d.upload(bayerImg);
-	//npp::NPPJpegCoder coder;
-	//coder.init(width, height, 99);
-	//coder.setWBRawType(false);
-	//coder.setCfaBayerType(3);
-	//coder.setWhiteBalanceGain(1.0f, 1.0f, 1.0f);
-	//uchar* data = new uchar[width * height];
-	//size_t maxlength = width * height;
-	//size_t *length = new size_t;
-	//cv::cuda::Stream stream;
-	//coder.encode(img_d, data, length, maxlength, stream);
-	//stream.waitForCompletion();
-
-	//std::ofstream outputFile("test.jpg", std::ios::out | std::ios::binary);
-	//outputFile.write((char*)data, *length);
 
 	return 0;
 }
