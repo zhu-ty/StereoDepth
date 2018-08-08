@@ -62,6 +62,7 @@ int main(int argc, char* argv[])
 	std::string intname = reader.Get("ImageRectify", "intrinsics", "intrinsics.yml"); 
 	std::string extname = reader.Get("ImageRectify", "extrinsics", "extrinsics.yml"); 
 	bool inv = reader.GetBoolean("ImageRectify", "inv", false);
+	bool resize_origin = reader.GetBoolean("ImageRectify", "resize", true);
 
 
 	name1 = cv::format("%s/%s", dir.c_str(), name1.c_str());
@@ -91,8 +92,12 @@ int main(int argc, char* argv[])
 	
 	sr.init(intname, extname, imgsize);
 	sr.rectify(img0, img1);
-	cv::resize(img0, img0, imgsize);
-	cv::resize(img1, img1, imgsize);
+
+	if (resize_origin)
+	{
+		cv::resize(img0, img0, imgsize);
+		cv::resize(img1, img1, imgsize);
+	}
 
 
 
