@@ -1,3 +1,6 @@
 [submodule "Cpp/GenCameraDriver"]
 	path = Cpp/GenCameraDriver
 	url = https://github.com/yuanxy92/GenCameraDriver
+[submodule "Cpp/OpenGLImageWarper"]
+	path = Cpp/OpenGLImageWarper
+	url = https://github.com/yuanxy92/OpenGLImageWarper.git
