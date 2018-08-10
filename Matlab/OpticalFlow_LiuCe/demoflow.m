@@ -1,15 +1,14 @@
 addpath('mex');
 
-% we provide two sequences "car" and "table"
-example = '';
-%example = 'car';
+dir = 'E:/data/stereo/No2';
+
+pic_master = 'CUCAU1731016_Resized_R.jpg';
+pic_slave = 'CUCAU1731034_Resized_R.jpg';
 
 % load the two frames
-im1 = im2double(imread([example 'opt_00.jpg']));
-im2 = im2double(imread([example 'opt_01.jpg']));
+im1 = im2double(imread([dir,'/',pic_master]));
+im2 = im2double(imread([dir,'/',pic_slave]));
 
-% im1 = imresize(im1,0.5,'bicubic');
-% im2 = imresize(im2,0.5,'bicubic');
 
 % set optical flow parameters (see Coarse2FineTwoFrames.m for the definition of the parameters)
 alpha = 0.012;
@@ -27,27 +26,39 @@ tic;
 [vx,vy,warpI2] = Coarse2FineTwoFrames(im1,im2,para);
 toc
 
-figure;imshow(im1);figure;imshow(warpI2);
+save([dir,'/','flow_vx_vy.mat'], 'vx','vy');
+vx_abs = abs(vx);
+writeftif(vx_abs,[dir,'/','disparity.tiff']);
 
-
-
-% output gif
-clear volume;
-volume(:,:,:,1) = im1;
-volume(:,:,:,2) = im2;
-if exist('output','dir')~=7
-    mkdir('output');
-end
-frame2gif(volume,fullfile('output',[example '_input.gif']));
-volume(:,:,:,2) = warpI2;
-frame2gif(volume,fullfile('output',[example '_warp.gif']));
-
-
-% visualize flow field
 clear flow;
 flow(:,:,1) = vx;
 flow(:,:,2) = vy;
 imflow = flowToColor(flow);
 
 figure;imshow(imflow);
-imwrite(imflow,fullfile('output',[example '_flow.jpg']),'quality',100);
+
+% 
+% figure;imshow(im1);figure;imshow(warpI2);
+% 
+% % 
+% 
+% % output gif
+% clear volume;
+% volume(:,:,:,1) = im1;
+% volume(:,:,:,2) = im2;
+% if exist('output','dir')~=7
+%     mkdir('output');
+% end
+% frame2gif(volume,fullfile('output',[example '_input.gif']));
+% volume(:,:,:,2) = warpI2;
+% frame2gif(volume,fullfile('output',[example '_warp.gif']));
+% 
+% 
+% % visualize flow field
+% clear flow;
+% flow(:,:,1) = vx;
+% flow(:,:,2) = vy;
+% imflow = flowToColor(flow);
+% 
+% figure;imshow(imflow);
+% imwrite(imflow,fullfile('output',[example '_flow.jpg']),'quality',100);
