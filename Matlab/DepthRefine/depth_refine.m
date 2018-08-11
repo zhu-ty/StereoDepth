@@ -1,4 +1,4 @@
-function [refined] = depth_refine(I,depth)
+function [refined] = depth_refine(depth,varargin)
 
 addpath(genpath('MeshDepth'));
 
