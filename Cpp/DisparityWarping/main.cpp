@@ -13,6 +13,21 @@
 #define EPS 1e-3f
 #endif
 
+#define POWER_WEIGHT 1.5f
+
+float calc_single_weight_2(int y, int x, int height, int width)
+{
+	float ret = 0.0f;
+	float c_y = abs(y - (height/2.0f));
+	float c_x = abs(x - (width/2.0f));
+	if ((c_y / c_x) < ((float)height / width))
+		//return 1.0f - abs(c_x / (width / 2.0f));
+		ret = 1.0f - abs(c_x / (width / 2.0f));
+	else ret = 1.0f - abs(c_y / (height / 2.0f));
+	return pow(ret, POWER_WEIGHT);
+}
+
+
 float calc_single_weight(int y, int x, int height, int width)
 {
 	// Smaller the better (close to the center)
@@ -20,6 +35,28 @@ float calc_single_weight(int y, int x, int height, int width)
 	float width2 = width / 2.0f;
 	return (y - height2) * (y - height2) + (x - width2)*(x - width2);
 	//return sqrtf((y - height2) * (y - height2) + (x - width2)*(x - width2));
+}
+
+float calc_weight_ans_2(std::vector<float> weight_list, std::vector<float> &value_list)
+{
+	if (weight_list.size() == 0)
+		return DISTANCE_MAX;
+	float denominator = 0.0f;
+	float ret = 0.0f;
+	for (int i = 0; i < weight_list.size(); i++)
+	{
+		denominator += weight_list[i];
+	}
+	//if (denominator < EPS)
+	//	return DISTANCE_MAX;
+	for (int i = 0; i < weight_list.size(); i++)
+	{
+		if (denominator < EPS)
+			ret += (1.0f / weight_list.size()) * value_list[i];
+		else
+			ret += weight_list[i] * value_list[i] / denominator;
+	}
+	return ret;
 }
 
 float calc_weight_ans(std::vector<float> weight_list, std::vector<float> &value_list)
@@ -38,6 +75,24 @@ float calc_weight_ans(std::vector<float> weight_list, std::vector<float> &value_
 		ret += weight_list[i] * value_list[i] / denominator;
 	}
 	return ret;
+}
+
+//weight: bigger the heavier
+int calc_img_weight_2(int h, int w, cv::Point corner, cv::Mat img_warped, cv::Mat weight_warped, float &weight, float &value)
+{
+	int rela_h = h - corner.y;
+	int rela_w = w - corner.x;
+	if (rela_h >= 0 && rela_h < img_warped.rows && rela_w >= 0 && rela_w < img_warped.cols)
+	{
+		weight = weight_warped.at<float>(rela_h, rela_w);
+		value = img_warped.at<float>(rela_h, rela_w);
+	}
+	else
+	{
+		weight = 0.0f;
+		value = -1.0f;
+	}
+	return 0;
 }
 
 //weight: smaller the heavier
@@ -98,7 +153,7 @@ int main(int argc, char** argv)
 	for(int i = 0;i < height;i++)
 		for (int j = 0; j < width; j++)
 		{
-			weight.at<float>(i, j) = calc_single_weight(i, j, height, width);
+			weight.at<float>(i, j) = calc_single_weight_2(i, j, height, width);
 		}
 
 	cv::Ptr<cv::detail::SphericalWarper> w = cv::makePtr<cv::detail::SphericalWarper>(false);
@@ -149,11 +204,14 @@ int main(int argc, char** argv)
 				for (int j = 0; j < refCount; j++)
 				{
 					float weight, value;
-					calc_img_weight(global_h, global_w, corner_warped[j], imgs_warped[j], weights_warped[j], weight, value);
-					weight_list_pt.push_back(weight);
-					value_list_pt.push_back(value);
+					calc_img_weight_2(global_h, global_w, corner_warped[j], imgs_warped[j], weights_warped[j], weight, value);
+					if (value > 0.0f)
+					{
+						weight_list_pt.push_back(weight);
+						value_list_pt.push_back(value);
+					}
 				}
-				imgs_averaged[i].at<float>(h, w) = calc_weight_ans(weight_list_pt, value_list_pt);
+				imgs_averaged[i].at<float>(h, w) = calc_weight_ans_2(weight_list_pt, value_list_pt);
 			}
 			if (((float)h) / ((float)imgs_warped[i].rows) > percent)
 			{
