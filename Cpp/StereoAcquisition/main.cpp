@@ -16,7 +16,8 @@ Online Stereo Image Capture
 
 int main(int argc, char* argv[]) {
 	std::vector<cam::GenCamInfo> camInfos;
-	std::shared_ptr<cam::GenCamera> cameraPtr = cam::createCamera(cam::CameraModel::XIMEA_xiC);
+	//std::shared_ptr<cam::GenCamera> cameraPtr = cam::createCamera(cam::CameraModel::XIMEA_xiC);
+	std::shared_ptr<cam::GenCamera> cameraPtr = cam::createCamera(cam::CameraModel::PointGrey_u3);
 	cameraPtr->init();
 	// set camera setting
 	cameraPtr->startCapture();
@@ -26,6 +27,7 @@ int main(int argc, char* argv[]) {
 	cameraPtr->makeSetEffective();
 	// set capturing setting
 	cameraPtr->setCaptureMode(cam::GenCamCaptureMode::Continous, 200);
+	cameraPtr->setAutoWhiteBalance(-1);
 	// get camera info
 	cameraPtr->getCamInfos(camInfos);
 	cameraPtr->startCaptureThreads();
@@ -39,8 +41,8 @@ int main(int argc, char* argv[]) {
 	cv::Mat K2 = K1.clone();
 	cv::Size chessBoardSize(11, 8);
 
-	cv::Mat img1 = cv::imread("1.png");
-	cv::Mat img2 = cv::imread("2.png");
+	//cv::Mat img1 = cv::imread("1.png");
+	//cv::Mat img2 = cv::imread("2.png");
 
 	StereoCalibration stereoCalibrator;
 	stereoCalibrator.init(K1, K2, chessBoardSize);
@@ -51,14 +53,18 @@ int main(int argc, char* argv[]) {
 	std::vector<cv::cuda::GpuMat> imgs_bayer_d(2);
 	std::vector<cv::cuda::GpuMat> imgs_d(2);
 
-	cv::Mat wbMat(camInfos[0].height, camInfos[0].width, CV_8UC3);
-	wbMat.setTo(cv::Scalar(2, 1, 2));
-	cv::cuda::GpuMat wbMat_d;
-	wbMat_d.upload(wbMat);
+	//cv::Mat wbMat(camInfos[0].height, camInfos[0].width, CV_8UC3);
+	//wbMat.setTo(cv::Scalar(2, 1, 2));
+	//cv::cuda::GpuMat wbMat_d;
+	//wbMat_d.upload(wbMat);
 
 	SysUtil::sleep(1000);
 	int nframe = 0;
 	cv::Rect rect;
+
+	SysUtil::mkdir("./images");
+	SysUtil::mkdir("./images/0");
+	SysUtil::mkdir("./images/1");
 	for (;;) {
 		std::cout << nframe++ << std::endl;
 		cameraPtr->captureFrame(imgdatas);
@@ -71,17 +77,17 @@ int main(int argc, char* argv[]) {
 		imgs_bayer_d[0].upload(imgs[0]);
 		imgs_bayer_d[1].upload(imgs[1]);
 
-		cv::cuda::demosaicing(imgs_bayer_d[0], imgs_d[0], cv::COLOR_BayerBG2BGR, -1);
-		cv::cuda::demosaicing(imgs_bayer_d[1], imgs_d[1], cv::COLOR_BayerBG2BGR, -1);
+		cv::cuda::demosaicing(imgs_bayer_d[0], imgs_d[0], cv::COLOR_BayerRG2BGR, -1);
+		cv::cuda::demosaicing(imgs_bayer_d[1], imgs_d[1], cv::COLOR_BayerRG2BGR, -1);
 
-		imgs_d[0] = StereoCalibration::applyWhiteBalance(imgs_d[0], 2, 1, 2);
-		imgs_d[1] = StereoCalibration::applyWhiteBalance(imgs_d[1], 2, 1, 2);
+		imgs_d[0] = StereoCalibration::applyWhiteBalance(imgs_d[0], 0.85, 1, 1.1);
+		imgs_d[1] = StereoCalibration::applyWhiteBalance(imgs_d[1], 0.85, 1, 1.1);
 
 		imgs_d[0].download(imgs_c[0]);
 		imgs_d[1].download(imgs_c[1]);
 
 		stereoCalibrator.SaveImg(imgs_c[0], imgs_c[1]);
-		SysUtil::sleep(5);
+		SysUtil::sleep(50);
 	}
 
 	cameraPtr->stopCaptureThreads();
