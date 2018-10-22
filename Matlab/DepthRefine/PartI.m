@@ -1,11 +1,11 @@
 clc;
 clear;
 
-dir = 'E:/data/stereo/No2';
+dir = 'E:/data/inpaint_test';
 disparity_name = 'disparity.tiff';
-pt = [1066;2159];%x,y
-d = 4000;%cm
-K = [ 8.24600342e+02, 0., 1000., 0., 8.24600342e+02, 750., 0., 0.,  ...
+pt = [500;600];%x,y
+d = 2000;%cm
+K = [ 8.24600342e+02, 0., 505., 0., 8.24600342e+02, 605., 0., 0.,  ...
        1. ];
 
 % dir = 'E:/data/stereo/No1';

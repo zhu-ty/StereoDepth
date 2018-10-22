@@ -1,9 +1,9 @@
 clc;
 clear;
 
-dir = 'E:/data/stereo/No2';
-depth_name = 'depth_center1_warp_2.tiff';
-out_name = 'depth_center1_warp_2.png';
+dir = 'E:/data/inpaint_test';
+depth_name = 'depth_DepthOnly.tiff';
+out_name = 'depth_DepthOnly.png';
 
 depth = double(imread([dir,'/',depth_name]));
 %smooth = depth_refine(depth);

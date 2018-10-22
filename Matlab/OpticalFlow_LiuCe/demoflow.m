@@ -1,13 +1,15 @@
 addpath('mex');
 
-dir = 'E:/data/stereo/No2';
+dir = 'E:/data/inpaint_test';
 
-pic_master = 'CUCAU1731016_Resized_R.jpg';
-pic_slave = 'CUCAU1731034_Resized_R.jpg';
+pic_master = '0000_left.png';
+pic_slave = '0000_right.jpg';
 
 % load the two frames
 im1 = im2double(imread([dir,'/',pic_master]));
 im2 = im2double(imread([dir,'/',pic_slave]));
+
+im2 = imresize(im2, [size(im1,1),size(im1,2)]);
 
 
 % set optical flow parameters (see Coarse2FineTwoFrames.m for the definition of the parameters)
