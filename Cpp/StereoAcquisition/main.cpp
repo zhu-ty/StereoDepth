@@ -80,8 +80,8 @@ int main(int argc, char* argv[]) {
 		cv::cuda::demosaicing(imgs_bayer_d[0], imgs_d[0], cv::COLOR_BayerRG2BGR, -1);
 		cv::cuda::demosaicing(imgs_bayer_d[1], imgs_d[1], cv::COLOR_BayerRG2BGR, -1);
 
-		imgs_d[0] = StereoCalibration::applyWhiteBalance(imgs_d[0], 0.85, 1, 1.1);
-		imgs_d[1] = StereoCalibration::applyWhiteBalance(imgs_d[1], 0.85, 1, 1.1);
+		imgs_d[0] = StereoCalibration::applyWhiteBalance(imgs_d[0], 1, 1, 1.0);
+		imgs_d[1] = StereoCalibration::applyWhiteBalance(imgs_d[1], 1, 1, 1.0);
 
 		imgs_d[0].download(imgs_c[0]);
 		imgs_d[1].download(imgs_c[1]);
