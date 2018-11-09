@@ -22,8 +22,9 @@ int main(int argc, char* argv[]) {
 	// set camera setting
 	cameraPtr->startCapture();
 	cameraPtr->setFPS(-1, 10);
-	cameraPtr->setAutoExposure(-1, cam::Status::on);
-	cameraPtr->setAutoExposureLevel(-1, 20);
+	//cameraPtr->setAutoExposure(-1, cam::Status::on);
+	//cameraPtr->setAutoExposureLevel(-1, 20);
+	cameraPtr->setExposure(-1, 10000);
 	cameraPtr->makeSetEffective();
 	// set capturing setting
 	cameraPtr->setCaptureMode(cam::GenCamCaptureMode::Continous, 200);
