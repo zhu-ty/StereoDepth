@@ -104,7 +104,7 @@ StereoCalib(const vector<string>& imagelist, Size boardSize, float squareSize, b
                 else
                     resize(img, timg, Size(), scale, scale, INTER_LINEAR_EXACT);
                 found = findChessboardCorners(timg, boardSize, corners,
-                    CALIB_CB_ADAPTIVE_THRESH | CALIB_CB_NORMALIZE_IMAGE);
+                    CALIB_CB_ADAPTIVE_THRESH | CALIB_CB_NORMALIZE_IMAGE | CALIB_CB_FAST_CHECK);
                 if( found )
                 {
                     if( scale > 1 )
