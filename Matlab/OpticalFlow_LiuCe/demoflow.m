@@ -1,9 +1,9 @@
 addpath('mex');
 
-dir = 'E:/data/inpaint_test';
+dir = 'E:/data/20190111/No1';
 
-pic_master = '0000_left.png';
-pic_slave = '0000_right.jpg';
+pic_master = 'AL.jpg';
+pic_slave = 'AR.jpg';
 
 % load the two frames
 im1 = im2double(imread([dir,'/',pic_master]));

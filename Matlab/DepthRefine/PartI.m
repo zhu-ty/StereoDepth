@@ -1,7 +1,7 @@
 clc;
 clear;
 
-dir = 'E:/data/inpaint_test';
+dir = 'E:/data/20190110';
 disparity_name = 'disparity.tiff';
 pt = [500;600];%x,y
 d = 2000;%cm

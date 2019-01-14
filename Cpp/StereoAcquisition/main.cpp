@@ -16,19 +16,25 @@ Online Stereo Image Capture
 
 int main(int argc, char* argv[]) {
 	std::vector<cam::GenCamInfo> camInfos;
-	//std::shared_ptr<cam::GenCamera> cameraPtr = cam::createCamera(cam::CameraModel::XIMEA_xiC);
-	std::shared_ptr<cam::GenCamera> cameraPtr = cam::createCamera(cam::CameraModel::PointGrey_u3);
+	cam::CameraModel cm = cam::CameraModel::XIMEA_xiC;
+	std::shared_ptr<cam::GenCamera> cameraPtr = cam::createCamera(cm);
+	//std::shared_ptr<cam::GenCamera> cameraPtr = cam::createCamera(cam::CameraModel::PointGrey_u3);
 	cameraPtr->init();
 	// set camera setting
-	cameraPtr->startCapture();
 	cameraPtr->setFPS(-1, 10);
+	cameraPtr->setCamBufferType(cam::GenCamBufferType::Raw);
+	cameraPtr->startCapture();
+	
 	//cameraPtr->setAutoExposure(-1, cam::Status::on);
 	//cameraPtr->setAutoExposureLevel(-1, 20);
 	cameraPtr->setExposure(-1, 10000);
+	cameraPtr->setWhiteBalance(-1, 2.0, 1.0, 2.0);
 	cameraPtr->makeSetEffective();
 	// set capturing setting
+	
 	cameraPtr->setCaptureMode(cam::GenCamCaptureMode::Continous, 200);
-	cameraPtr->setAutoWhiteBalance(-1);
+	cameraPtr->setCapturePurpose(cam::GenCamCapturePurpose::Streaming);
+	//cameraPtr->setAutoWhiteBalance(-1);
 	// get camera info
 	cameraPtr->getCamInfos(camInfos);
 	cameraPtr->startCaptureThreads();
@@ -78,11 +84,21 @@ int main(int argc, char* argv[]) {
 		imgs_bayer_d[0].upload(imgs[0]);
 		imgs_bayer_d[1].upload(imgs[1]);
 
-		cv::cuda::demosaicing(imgs_bayer_d[0], imgs_d[0], cv::COLOR_BayerRG2BGR, -1);
-		cv::cuda::demosaicing(imgs_bayer_d[1], imgs_d[1], cv::COLOR_BayerRG2BGR, -1);
+		//cv::Mat tmp;
+		//cv::demosaicing(imgs[0], tmp, npp::bayerPatternNPP2CVRGB(static_cast<NppiBayerGridPosition>(
+		//	static_cast<int>(camInfos[0].bayerPattern))), -1);
 
-		imgs_d[0] = StereoCalibration::applyWhiteBalance(imgs_d[0], 1, 1, 1.0);
-		imgs_d[1] = StereoCalibration::applyWhiteBalance(imgs_d[1], 1, 1, 1.0);
+		cv::cuda::demosaicing(imgs_bayer_d[0], imgs_d[0], 
+			npp::bayerPatternNPP2CVRGB(static_cast<NppiBayerGridPosition>(
+			static_cast<int>(camInfos[0].bayerPattern))), -1);
+		cv::cuda::demosaicing(imgs_bayer_d[1], imgs_d[1], 
+			npp::bayerPatternNPP2CVRGB(static_cast<NppiBayerGridPosition>(
+			static_cast<int>(camInfos[1].bayerPattern))), -1);
+		if (cm == cam::CameraModel::XIMEA_xiC)
+		{
+			imgs_d[0] = StereoCalibration::applyWhiteBalance(imgs_d[0], 2.0, 1, 2.0);
+			imgs_d[1] = StereoCalibration::applyWhiteBalance(imgs_d[1], 2.0, 1, 2.0);
+		}
 
 		imgs_d[0].download(imgs_c[0]);
 		imgs_d[1].download(imgs_c[1]);
