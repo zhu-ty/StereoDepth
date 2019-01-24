@@ -1,12 +1,12 @@
 clc;
 clear;
 
-dir = 'E:/data/20190110';
-disparity_name = 'disparity.tiff';
-pt = [500;600];%x,y
-d = 2000;%cm
-K = [ 8.24600342e+02, 0., 505., 0., 8.24600342e+02, 605., 0., 0.,  ...
-       1. ];
+dir = 'C:/Users/SZ/Desktop/t4';
+disparity_name = 'disparity_vy.tiff';
+% pt = [500;600];%x,y
+% d = 2000;%cm
+E = 27766.47;
+K = [ 8.13286194e+02, 0., 1000., 0., 8.13286194e+02, 750., 0., 0., 1. ];
 
 % dir = 'E:/data/stereo/No1';
 % disparity_name = 'disparity.tiff';
@@ -39,8 +39,9 @@ end
 % Use real world to modify the depth
 % Depth unit: cm
 
-I_depth_center_fixed = I_depth_center * (d / I_depth_center(pt(2),pt(1)));
+I_depth_center_fixed = I_depth_center * E;
 I_depth_center_fixed(I_depth_center_fixed > 50000) = 50000;
 imshow(I_depth_center_fixed,[]);
 
-writeftif(I_depth_center_fixed, [dir,'/','depth_center.tiff']);
+writeftif(I_depth_center_fixed, [dir,'/','depth_centered.tiff']);
+imwrite(uint16(I_depth_center_fixed), [dir,'/','depth_centered.png']);

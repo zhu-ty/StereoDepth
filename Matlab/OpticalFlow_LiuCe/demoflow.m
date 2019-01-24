@@ -1,6 +1,6 @@
 addpath('mex');
 
-dir = 'E:/data/20190111/No1';
+dir = 'C:/Users/SZ/Desktop/t4';
 
 pic_master = 'AL.jpg';
 pic_slave = 'AR.jpg';
@@ -30,7 +30,8 @@ toc
 
 save([dir,'/','flow_vx_vy.mat'], 'vx','vy');
 vx_abs = abs(vx);
-writeftif(vx_abs,[dir,'/','disparity.tiff']);
+writeftif(vx_abs,[dir,'/','disparity_vx.tiff']);
+writeftif(abs(vy),[dir,'/','disparity_vy.tiff']);
 
 clear flow;
 flow(:,:,1) = vx;
