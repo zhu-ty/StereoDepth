@@ -2,7 +2,7 @@ clc;
 clear;
 
 dir = 'C:/Users/SZ/Desktop/t4';
-disparity_name = 'disparity_vy.tiff';
+disparity_name = 'all_inpaint.tiff';
 % pt = [500;600];%x,y
 % d = 2000;%cm
 E = 27766.47;
@@ -43,5 +43,5 @@ I_depth_center_fixed = I_depth_center * E;
 I_depth_center_fixed(I_depth_center_fixed > 50000) = 50000;
 imshow(I_depth_center_fixed,[]);
 
-writeftif(I_depth_center_fixed, [dir,'/','depth_centered.tiff']);
-imwrite(uint16(I_depth_center_fixed), [dir,'/','depth_centered.png']);
+writeftif(I_depth_center_fixed, [dir,'/','depth_centered_median.tiff']);
+imwrite(uint16(I_depth_center_fixed), [dir,'/','depth_centered_median.png']);
