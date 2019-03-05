@@ -4,3 +4,6 @@
 [submodule "Cpp/OpenGLImageWarper"]
 	path = Cpp/OpenGLImageWarper
 	url = https://github.com/yuanxy92/OpenGLImageWarper.git
+[submodule "Cpp/CameraCalibration"]
+	path = Cpp/CameraCalibration
+	url = https://github.com/zhu-ty/CameraCalibration
