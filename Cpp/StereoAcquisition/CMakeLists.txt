@@ -27,7 +27,7 @@ else ()
     set(XIMEA_SDK_LIBRARY_RELEASE optimized "/usr/lib/libm3api.so")
 endif()
 include_directories(${XIMEA_SDK_INCLUDE_DIR})
-include_directories(${XIMEA_SDK_INCLUDE_DIR})
+
 
 # General camera driver
 set(CAMERA_DRIVER_DIR ${PROJECT_SOURCE_DIR}/GenCameraDriver)
@@ -43,23 +43,24 @@ ${CAMERA_DRIVER_FILE_CU}
 ${CAMERA_DRIVER_FILE_H}
 ${CAMERA_DRIVER_FILE_HPP})
 
+list(REMOVE_ITEM CAMERA_DRIVER_FILE ${CAMERA_DRIVER_DIR}/SKEncoder/main.cpp)
 list(REMOVE_ITEM CAMERA_DRIVER_FILE ${CAMERA_DRIVER_DIR}/main.cpp)
 
-# set(CAMERA_DRIVER_FILE
-# 	${CAMERA_DRIVER_DIR}/XIMEA/XIMEACamera.h
-# 	${CAMERA_DRIVER_DIR}/FileCamera/FileCamera.h
-# 	${CAMERA_DRIVER_DIR}/PointGrey/PointGreyCamera.h
-# 	${CAMERA_DRIVER_DIR}/GenCameraDriver.h
-# 	${CAMERA_DRIVER_DIR}/RealCameraDriver.h
-# 	${CAMERA_DRIVER_DIR}/NPPJpegCoder.h
-# 	${CAMERA_DRIVER_DIR}/XIMEA/XIMEACamera.cpp
-# 	${CAMERA_DRIVER_DIR}/FileCamera/FileCamera.cpp
-# 	${CAMERA_DRIVER_DIR}/PointGrey/PointGreyCamera.cpp
-# 	${CAMERA_DRIVER_DIR}/GenCameraDriver.cpp
-# 	${CAMERA_DRIVER_DIR}/GenCameraDriverImpl.cpp
-# 	${CAMERA_DRIVER_DIR}/RealCameraDriver.cpp
-# 	${CAMERA_DRIVER_DIR}/NPPJpegCoder.cpp
-# )
+IF(WIN32)
+	file(GLOB_RECURSE REALTIME_DEPTH_H ${CAMERA_DRIVER_DIR}/Stereo/RealTimeDepth/*.h)
+	file(GLOB_RECURSE REALTIME_DEPTH_CPP ${CAMERA_DRIVER_DIR}/Stereo/RealTimeDepth/*.cpp)
+	file(GLOB_RECURSE REALTIME_DEPTH_C ${CAMERA_DRIVER_DIR}/Stereo/RealTimeDepth/*.c)
+	list(REMOVE_ITEM CAMERA_DRIVER_FILE ${REALTIME_DEPTH_H})
+	list(REMOVE_ITEM CAMERA_DRIVER_FILE ${REALTIME_DEPTH_CPP})
+	list(REMOVE_ITEM CAMERA_DRIVER_FILE ${REALTIME_DEPTH_C})
+ELSE()
+	FIND_PACKAGE(Eigen3 REQUIRED) 
+    include_directories(${EIGEN3_INCLUDE_DIR})
+ENDIF()
+
+
+list(REMOVE_ITEM CAMERA_DRIVER_FILE ${CAMERA_DRIVER_DIR}/main.cpp)
+
 set(CAMERA_DRIVER_LIB
 	${PTGREY_SDK_LIBRARY}
 	${XIMEA_SDK_LIBRARY}
@@ -68,6 +69,9 @@ include_directories(
 	${CAMERA_DRIVER_DIR}
 	${PTGREY_SDK_INCLUDE_DIR}
 	${XIMEA_SDK_INCLUDE_DIR}
+	${CAMERA_DRIVER_DIR}/FileCamera
+	${CAMERA_DRIVER_DIR}/SKEncoder
+	${CAMERA_DRIVER_DIR}/SKEncoder/NvEncoder
 )
 
 
@@ -97,6 +101,8 @@ target_link_libraries(${stereo_exe_name}
     # OpenCV
     ${OpenCV_LIBS}
     # cuda libs
+	cuda
+	${NVCUVID_LIB}
     ${CUDA_LIBRARY} 	
 	${CUDA_npp_LIBRARY} 
 	${CUDA_nppc_LIBRARY} 

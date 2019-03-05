@@ -1,8 +1,8 @@
 clc;
 clear;
 
-dir = 'C:/Users/SZ/Desktop/t4';
-disparity_name = 'all_inpaint.tiff';
+dir = 'C:/Users/SZ/Desktop/depth_Feb_28_19';
+disparity_name = 'absvy.tiff';
 % pt = [500;600];%x,y
 % d = 2000;%cm
 E = 27766.47;
