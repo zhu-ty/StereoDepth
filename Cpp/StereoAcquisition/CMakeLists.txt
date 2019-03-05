@@ -81,13 +81,13 @@ set(MY_HEADER_FILES
     # C++ header file
 	#${PROJECT_SOURCE_DIR}/Common/SysUtil.hpp
 	${COMMON_HEADER_FILES}
-    StereoAcquisition.h
+    # StereoAcquisition.h
 )
 
 set(MY_SOURCE_FILES 
 	# C++ code
-    StereoAcquisition.cpp
-    StereoAcquisition.cu
+    # StereoAcquisition.cpp
+    # StereoAcquisition.cu
 	${CAMERA_DRIVER_FILE}
 )
 
