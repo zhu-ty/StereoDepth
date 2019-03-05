@@ -1,6 +1,17 @@
 # StereoDepth
 Software workflow for Stereo Camera Depth
 
+How to clone (IMPORTANT!):
+```
+git clone https://github.com/zhu-ty/StereoDepth
+cd StereoDepth
+git submodule init
+git submodule update
+```
+Make sure you have clone the submodule.
+
+Please report any cmake bug to me via my email. (Not very sure that this cmake can work for all)
+
 ## Camera Calibration
 ### Use calibration board and capture images at same time (Cpp Project StereoAcquisition) 
 
