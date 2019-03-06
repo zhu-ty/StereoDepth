@@ -45,6 +45,7 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 # C++ version
 set (CMAKE_CXX_STANDARD 11)
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 # C++ library postfix
 set (CMAKE_DEBUG_POSTFIX "_d")
@@ -82,7 +83,9 @@ ${headers_hpp}
 
 
 # add sub-directory
-add_subdirectory("DisparityWarping")
+IF(WIN32)
+    add_subdirectory("DisparityWarping")
+ENDIF()
 # add_subdirectory("GenCameraDriver")
 add_subdirectory("ImageRectify")
 add_subdirectory("StereoAcquisition")
