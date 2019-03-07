@@ -10,9 +10,15 @@ if ( WIN32 )
 	set(PTGREY_SDK_LIBRARY_DEBUG debug "C:/Program Files/Point Grey Research/Spinnaker/lib64/vs2015/Spinnakerd_v140.lib")
 	set(PTGREY_SDK_LIBRARY_RELEASE  optimized "C:/Program Files/Point Grey Research/Spinnaker/lib64/vs2015/Spinnaker_v140.lib")
 else()
-    set(PTGREY_SDK_INCLUDE_DIR "~/zhu-ty/spinnaker/include")
-    set(PTGREY_SDK_LIBRARY_DEBUG debug "~/zhu-ty/spinnaker/lib/libSpinnaker.so")
-    set(PTGREY_SDK_LIBRARY_RELEASE optimized "~/zhu-ty/spinnaker/lib/libSpinnaker.so")
+	set(PTGREY_SDK_INCLUDE_DIR $ENV{HOME}/zhu-ty/spinnaker/include)
+    set(PTGREY_SDK_INCLUDE_DIR ${PTGREY_SDK_INCLUDE_DIR} "/usr/include/spinnaker/")
+    if(EXISTS $ENV{HOME}/zhu-ty/spinnaker/lib/libSpinnaker.so)
+        set(PTGREY_SDK_LIBRARY_DEBUG debug $ENV{HOME}/zhu-ty/spinnaker/lib/libSpinnaker.so)
+        set(PTGREY_SDK_LIBRARY_RELEASE optimized $ENV{HOME}/zhu-ty/spinnaker/lib/libSpinnaker.so)
+    else()
+    set(PTGREY_SDK_LIBRARY_DEBUG debug "libSpinnaker.so")
+    set(PTGREY_SDK_LIBRARY_RELEASE optimized "libSpinnaker.so")
+    endif()
 endif()
 include_directories(${PTGREY_SDK_INCLUDE_DIR})
 
@@ -33,6 +39,7 @@ include_directories(${XIMEA_SDK_INCLUDE_DIR})
 set(CAMERA_DRIVER_DIR ${PROJECT_SOURCE_DIR}/GenCameraDriver)
 
 file(GLOB_RECURSE CAMERA_DRIVER_FILE_CPP ${CAMERA_DRIVER_DIR}/*.cpp)
+file(GLOB_RECURSE CAMERA_DRIVER_FILE_C ${CAMERA_DRIVER_DIR}/*.c)
 file(GLOB_RECURSE CAMERA_DRIVER_FILE_CU ${CAMERA_DRIVER_DIR}/*.cu)
 file(GLOB_RECURSE CAMERA_DRIVER_FILE_H ${CAMERA_DRIVER_DIR}/*.h)
 file(GLOB_RECURSE CAMERA_DRIVER_FILE_HPP ${CAMERA_DRIVER_DIR}/*.hpp)
@@ -40,6 +47,7 @@ file(GLOB_RECURSE CAMERA_DRIVER_FILE_HPP ${CAMERA_DRIVER_DIR}/*.hpp)
 set(CAMERA_DRIVER_FILE 
 ${CAMERA_DRIVER_FILE_CPP}
 ${CAMERA_DRIVER_FILE_CU}
+${CAMERA_DRIVER_FILE_C}
 ${CAMERA_DRIVER_FILE_H}
 ${CAMERA_DRIVER_FILE_HPP})
 
@@ -55,7 +63,11 @@ IF(WIN32)
 	list(REMOVE_ITEM CAMERA_DRIVER_FILE ${REALTIME_DEPTH_C})
 ELSE()
 	FIND_PACKAGE(Eigen3 REQUIRED) 
-    include_directories(${EIGEN3_INCLUDE_DIR})
+	include_directories(${EIGEN3_INCLUDE_DIR})
+	list(REMOVE_ITEM CAMERA_DRIVER_FILE ${CAMERA_DRIVER_DIR}/Stereo/RealTimeDepth/run_dense.cpp)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Wno-unknown-pragmas -std=c++11 -msse4")  #-Wall
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -Wno-unknown-pragmas -msse4")  #-Wall
+    include_directories(${CAMERA_DRIVER_DIR}/Stereo/RealTimeDepth)
 ENDIF()
 
 
