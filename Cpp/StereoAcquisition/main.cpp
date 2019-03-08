@@ -91,12 +91,12 @@ int main(int argc, char* argv[]) {
 			cv::cuda::cvtColor(imgs_d[i], imgs_d[i], cv::COLOR_RGB2BGR);
 			if (camInfos[i].isWBRaw == false)
 			{
-				imgs_d[i] = applyWhiteBalanceBGR(imgs_d[i], 1.89, 1, 1.45); //RGB
+				imgs_d[i] = applyWhiteBalanceBGR(imgs_d[i], 2.03, 1, 2.21); //RGB
 			}
 			imgs_d[i].download(imgs_c[i]);
 		}
 
-		cv::Size smallSize(imgs_c[0].cols / 4, imgs_c[0].rows / 4);
+		cv::Size smallSize(imgs_c[0].cols / 5, imgs_c[0].rows / 5);
 		cv::Mat smallImg1, smallImg2;
 		cv::resize(imgs_c[0], smallImg1, smallSize);
 		cv::resize(imgs_c[1], smallImg2, smallSize);
@@ -118,6 +118,7 @@ int main(int argc, char* argv[]) {
 
 	cameraPtr->stopCaptureThreads();
 	cameraPtr->release();
-
+	//int a = 1000000;
+	//Sleep(a);
 	return 0;
 }
