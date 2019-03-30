@@ -1,9 +1,9 @@
 addpath('mex');
 
-dir = 'C:/Users/SZ/Desktop/t4';
+dir = 'C:/Users/SZ/Desktop/sdrhcs/global';
 
-pic_master = 'AL.jpg';
-pic_slave = 'AR.jpg';
+pic_master = 'aL.jpg';
+pic_slave = 'aR.jpg';
 
 % load the two frames
 im1 = im2double(imread([dir,'/',pic_master]));
@@ -13,6 +13,8 @@ im2 = imresize(im2, [size(im1,1),size(im1,2)]);
 
 
 % set optical flow parameters (see Coarse2FineTwoFrames.m for the definition of the parameters)
+% building: alpha=0.08, ratio = 0.9
+% default: alpha=0.012, ratio = 0.75
 alpha = 0.012;
 ratio = 0.75;
 minWidth = 20;
