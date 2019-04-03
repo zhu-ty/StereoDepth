@@ -46,10 +46,10 @@ int main(int argc, char* argv[]) {
 	cameraPtr->setFPS(-1, 10);
 	cameraPtr->startCapture();
 	
-	//cameraPtr->setAutoExposure(-1, cam::Status::on);
-	//cameraPtr->setAutoExposureLevel(-1, 20);
-	cameraPtr->setExposure(-1, 20000);
-	//cameraPtr->setWhiteBalance(-1, 2.0, 1.0, 2.0); 
+	cameraPtr->setAutoExposure(-1, cam::Status::on);
+	cameraPtr->setAutoExposureLevel(-1, 30);
+	//cameraPtr->setExposure(-1, 20000);
+	//cameraPtr->setWhiteBalance(-1, 1.85, 1.0, 2.44); 
 	cameraPtr->makeSetEffective();
 	// set capturing setting
 	
@@ -83,7 +83,8 @@ int main(int argc, char* argv[]) {
 		for (int i = 0; i < 2; i++)
 		{
 			imgs[i] = cv::Mat(camInfos[i].height, camInfos[i].width,
-				CV_8U, reinterpret_cast<void*>(imgdatas[i].data));
+				CV_8U, reinterpret_cast<void*>(imgdatas[i].data
+					));
 			imgs_bayer_d[i].upload(imgs[i]);
 			cv::cuda::demosaicing(imgs_bayer_d[i], imgs_d[i],
 				npp::bayerPatternNPP2CVRGB(static_cast<NppiBayerGridPosition>(
@@ -91,12 +92,12 @@ int main(int argc, char* argv[]) {
 			cv::cuda::cvtColor(imgs_d[i], imgs_d[i], cv::COLOR_RGB2BGR);
 			if (camInfos[i].isWBRaw == false)
 			{
-				imgs_d[i] = applyWhiteBalanceBGR(imgs_d[i], 2.03, 1, 2.21); //RGB
+				imgs_d[i] = applyWhiteBalanceBGR(imgs_d[i], 1.95, 1, 1.93); //RGB
 			}
 			imgs_d[i].download(imgs_c[i]);
 		}
-
-		cv::Size smallSize(imgs_c[0].cols / 5, imgs_c[0].rows / 5);
+		int resizeFactor = 2.4;
+		cv::Size smallSize(imgs_c[0].cols / resizeFactor, imgs_c[0].rows / resizeFactor);
 		cv::Mat smallImg1, smallImg2;
 		cv::resize(imgs_c[0], smallImg1, smallSize);
 		cv::resize(imgs_c[1], smallImg2, smallSize);
