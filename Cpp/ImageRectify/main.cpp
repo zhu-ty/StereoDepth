@@ -15,6 +15,8 @@
 #include "INIReader.h"
 #include "SysUtil.hpp"
 
+#define GPU_MODE
+
 
 int main(int argc, char* argv[]) 
 {
@@ -65,6 +67,105 @@ int main(int argc, char* argv[])
 		}
 		cv::imwrite(inv ? "_slave.png" : "_master.png", master);
 		cv::imwrite(inv ? "_master.png" : "_slave.png", slave);
+	}
+	else if (SysUtil::getFileExtention(masterName) == "mp4")
+	{
+		cv::VideoCapture vc[2];
+		vc[0].open(masterName);
+		vc[1].open(slaveName);
+
+		int framesC = vc[0].get(cv::CAP_PROP_FRAME_COUNT);
+
+		cv::Mat firstMaster;
+		vc[0] >> firstMaster;
+		cv::Mat firstSlave;
+		vc[1] >> firstSlave;
+		cv::Size originSize = firstMaster.size();
+		StereoRectify sr;
+		sr.init(intname, extname, originSize);
+		if (!inv)
+			sr.rectify(firstMaster, firstSlave);
+		else
+			sr.rectify(firstSlave, firstMaster);
+		if (resize_origin)
+		{
+			cv::resize(firstMaster, firstMaster, originSize);
+			cv::resize(firstSlave, firstSlave, originSize);
+		}
+		cv::VideoWriter vw[2];
+		vw[0].open(inv ? "_slave.avi" : "_master.avi", CV_FOURCC('D', 'I', 'V', 'X'), 10, firstMaster.size());
+		vw[1].open(inv ? "_master.avi" : "_slave.avi", CV_FOURCC('D', 'I', 'V', 'X'), 10, firstSlave.size());
+		vw[0].write(firstMaster);
+		vw[1].write(firstSlave);
+
+		cv::imwrite(inv ? "@VideoSample_slave.png" : "@VideoSample_master.png", firstMaster);
+		cv::imwrite(inv ? "@VideoSample_master.png" : "@VideoSample_slave.png", firstSlave);
+
+		double stat = 0;
+		int lastFram = 0;
+		int currentTime = SysUtil::getCurrentTimeMicroSecond();
+		int lastTime = currentTime;
+
+#ifdef GPU_MODE
+		cv::cuda::GpuMat tmp_g[4];
+		tmp_g[0].upload(firstMaster);
+		tmp_g[1].upload(firstSlave);
+		tmp_g[2].create(tmp_g[0].size(), tmp_g[0].type());
+		tmp_g[3].create(tmp_g[1].size(), tmp_g[1].type());
+#endif // GPU_MODE
+		for (int fram = 0;; fram++)
+		{
+			if ((double)fram / framesC > stat)
+			{
+				currentTime = SysUtil::getCurrentTimeMicroSecond();
+				SysUtil::infoOutput(SysUtil::format("Video Rectify %d%% percent. Fps = %f", fram * 100 / framesC,
+					(double)(fram - lastFram) / (currentTime - lastTime) * 1000000.0));
+				stat += 0.01;
+				lastFram = fram;
+				lastTime = currentTime;
+			}
+
+			cv::Mat tmp[2];
+			bool brk = false;
+			for (int i = 0; i < 2; i++)
+			{
+				vc[i] >> tmp[i];
+				if (tmp[i].empty())
+				{
+					brk = true;
+					break;
+				}
+			}
+			if (brk)
+				break;
+#ifdef GPU_MODE
+			tmp_g[0].upload(tmp[0]);
+			tmp_g[1].upload(tmp[1]);
+			if (!inv)
+				sr.rectify(tmp_g[0], tmp_g[2], tmp_g[1], tmp_g[3]);
+			else
+				sr.rectify(tmp_g[1], tmp_g[3], tmp_g[0], tmp_g[2]);
+			tmp_g[2].download(tmp[0]);
+			tmp_g[3].download(tmp[1]);
+#else
+			if (!inv)
+				sr.rectify(tmp[0], tmp[1]);
+			else
+				sr.rectify(tmp[1], tmp[0]);
+#endif
+
+			for (int i = 0; i < 2; i++)
+			{
+				if (resize_origin)
+					cv::resize(tmp[i], tmp[i], originSize);
+				vw[i].write(tmp[i]);
+			}
+		}
+		for (int i = 0; i < 2; i++)
+		{
+			vc[i].release();
+			vw[i].release();
+		}
 	}
 	else
 	{
