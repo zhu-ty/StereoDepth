@@ -11,6 +11,7 @@ add_executable(${depth_exe_name}
     StereoRectify.h
     StereoRectify.cpp
     main.cpp
+	IRconfig.Sample.ini
 )
 
 target_link_libraries(${depth_exe_name}

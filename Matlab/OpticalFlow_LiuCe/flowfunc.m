@@ -1,4 +1,4 @@
-function [vxabs,vyabs] = flowfunc(LimgName,RimgName)
+function [vxabs,vyabs] = flowfunc(LimgName,RimgName, alpha, ratio)
 
 addpath('mex');
 
@@ -17,8 +17,8 @@ im2 = imresize(im2, [size(im1,1),size(im1,2)]);
 % set optical flow parameters (see Coarse2FineTwoFrames.m for the definition of the parameters)
 % building: alpha=0.08, ratio = 0.9
 % default: alpha=0.012, ratio = 0.75
-alpha = 0.012;
-ratio = 0.75;
+% alpha = 0.012;
+% ratio = 0.75;
 minWidth = 20;
 nOuterFPIterations = 7;
 nInnerFPIterations = 1;

@@ -78,9 +78,8 @@ public:
 #ifdef WIN32
 		_mkdir(dir);
 #else
-		char command[256];
-		sprintf(command, "mkdir %s", dir);
-		system(command);
+		infoOutput("Makring dir :" + std::string(dir));
+		printf("MKDIR RETURN:: %d\n", ::mkdir(dir, S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH));
 #endif
 		return 0;
 	}
@@ -242,6 +241,11 @@ public:
 		va_end(list);
 
 		return std::string(text);
+	}
+
+	static std::string getFileExtention(std::string fileName)
+	{
+		return fileName.substr(fileName.find_last_of(".") + 1);
 	}
 };
 

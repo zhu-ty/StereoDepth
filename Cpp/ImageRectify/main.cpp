@@ -15,33 +15,6 @@
 #include "INIReader.h"
 #include "SysUtil.hpp"
 
-int old_version(int argc, char* argv[])
-{
-	std::string dir = std::string(argv[1]);
-	std::string leftname = cv::format("%s/%s", dir.c_str(), argv[2]);
-	std::string rightname = cv::format("%s/%s", dir.c_str(), argv[3]);
-	std::string leftoutname = cv::format("%s/%s", dir.c_str(), argv[4]);
-	std::string rightoutname = cv::format("%s/%s", dir.c_str(), argv[5]);
-
-
-	int width, height, frame_count;
-	cv::Mat left, right;
-	right = cv::imread(leftname);
-	left = cv::imread(rightname);
-	cv::Size imgsize = left.size();
-
-	StereoRectify sr;
-	std::string intname = cv::format("%s/intrinsics.yml", dir.c_str());
-	std::string extname = cv::format("%s/extrinsics.yml", dir.c_str());
-	sr.init(intname, extname, imgsize);
-
-	sr.rectify(left, right);
-	cv::imwrite(leftoutname, left);
-	cv::imwrite(rightoutname, right);
-
-	return 0;
-}
-
 
 int main(int argc, char* argv[]) 
 {
@@ -54,64 +27,49 @@ int main(int argc, char* argv[])
 		SysUtil::errorOutput(std::string("ImageRectify::load_config Can't load :") + path);
 		return -1;
 	}
+	std::string version_test = reader.Get("ImageRectify", "img0", "");
+	if (version_test != "")
+	{
+		SysUtil::errorOutput("Seems like you are using old version of IRConfig.ini config file with a new verison of ImageRecitify.exe, please change to new version of INI.");
+		SysUtil::infoOutput("Check Here: https://github.com/zhu-ty/StereoDepth/blob/master/Cpp/ImageRectify/IRconfig.Sample.ini");
+		return -1;
+	}
+
 	std::string dir = reader.Get("ImageRectify", "dir", ".");
-	std::string name1 = reader.Get("ImageRectify", "img0", "0.jpg");
-	std::string name2 = reader.Get("ImageRectify", "img1", "1.jpg");
-	std::string outname1 = reader.Get("ImageRectify", "outImg0", "Rectify0.jpg");
-	std::string outname2 = reader.Get("ImageRectify", "outImg1", "Rectify1.jpg");
-	std::string intname = reader.Get("ImageRectify", "intrinsics", "intrinsics.yml"); 
-	std::string extname = reader.Get("ImageRectify", "extrinsics", "extrinsics.yml"); 
+	std::string intname = reader.Get("ImageRectify", "intrinsics", "intrinsics.yml");
+	intname = dir + "/" + intname;
+	std::string extname = reader.Get("ImageRectify", "extrinsics", "extrinsics.yml");
+	extname = dir + "/" + extname;
+	std::string masterName = reader.Get("ImageRectify", "Master", "0.jpg");
+	masterName = dir + "/" + masterName;
+	std::string slaveName = reader.Get("ImageRectify", "Slave", "0.jpg");
+	slaveName = dir + "/" + slaveName;
 	bool inv = reader.GetBoolean("ImageRectify", "inv", false);
 	bool resize_origin = reader.GetBoolean("ImageRectify", "resize", true);
 
-
-	name1 = cv::format("%s/%s", dir.c_str(), name1.c_str());
-	name2 = cv::format("%s/%s", dir.c_str(), name2.c_str());
-	intname = cv::format("%s/%s", dir.c_str(), intname.c_str());
-	extname = cv::format("%s/%s", dir.c_str(), extname.c_str());
-	outname1 = cv::format("%s/%s", dir.c_str(), outname1.c_str());
-	outname2 = cv::format("%s/%s", dir.c_str(), outname2.c_str());
-
-
-
-	if (inv)
+	if (SysUtil::getFileExtention(masterName) == "jpg" || SysUtil::getFileExtention(masterName) == "png")
 	{
-		std::string tmp = name1;
-		name1 = name2;
-		name2 = tmp;
-	}
-
-	int width, height;
-	cv::Mat img0 = cv::imread(name1);
-	cv::Mat img1 = cv::imread(name2);
-
-	width = img0.cols;
-	height = img0.rows;
-	cv::Size imgsize(width, height);
-	StereoRectify sr;
-	
-	sr.init(intname, extname, imgsize);
-	sr.rectify(img0, img1);
-
-	if (resize_origin)
-	{
-		cv::resize(img0, img0, imgsize);
-		cv::resize(img1, img1, imgsize);
-	}
-
-
-
-	if (inv)
-	{
-		cv::imwrite(outname1, img1);
-		cv::imwrite(outname2, img0);
+		cv::Mat master = cv::imread(masterName);
+		cv::Mat slave = cv::imread(slaveName);
+		cv::Size originSize = master.size();
+		StereoRectify sr;
+		sr.init(intname, extname, originSize);
+		if (!inv)
+			sr.rectify(master, slave);
+		else
+			sr.rectify(slave, master);
+		if (resize_origin)
+		{
+			cv::resize(master, master, originSize);
+			cv::resize(slave, slave, originSize);
+		}
+		cv::imwrite(inv ? "_slave.png" : "_master.png", master);
+		cv::imwrite(inv ? "_master.png" : "_slave.png", slave);
 	}
 	else
 	{
-		cv::imwrite(outname1, img0);
-		cv::imwrite(outname2, img1);
+		SysUtil::errorOutput("Unsupported file, given extention = " + SysUtil::getFileExtention(masterName));
 	}
-
 	return 0;
 
 }
