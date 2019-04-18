@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
 		cv::imwrite(inv ? "_slave.png" : "_master.png", master);
 		cv::imwrite(inv ? "_master.png" : "_slave.png", slave);
 	}
-	else if (SysUtil::getFileExtention(masterName) == "mp4")
+	else if (SysUtil::getFileExtention(masterName) == "mp4" || SysUtil::getFileExtention(masterName) == "avi")
 	{
 		cv::VideoCapture vc[2];
 		vc[0].open(masterName);
