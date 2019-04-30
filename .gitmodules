@@ -7,3 +7,6 @@
 [submodule "Cpp/CameraCalibration"]
 	path = Cpp/CameraCalibration
 	url = https://github.com/zhu-ty/CameraCalibration
+[submodule "Cpp/SKEncoder"]
+	path = Cpp/SKEncoder
+	url = git@github.com:zhu-ty/SKEncoder.git

@@ -7,6 +7,7 @@
 #include <string>
 #include <thread>
 #include <memory>
+#include <stdio.h>
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/cudastereo.hpp>
@@ -14,8 +15,8 @@
 #include "StereoRectify.h"
 #include "INIReader.h"
 #include "SysUtil.hpp"
-
-#define GPU_MODE
+#include "SKEncoder/SKEncoder.h"
+#include "FFVideoReader.h"
 
 
 int main(int argc, char* argv[]) 
@@ -68,19 +69,20 @@ int main(int argc, char* argv[])
 		cv::imwrite(inv ? "_slave.png" : "_master.png", master);
 		cv::imwrite(inv ? "_master.png" : "_slave.png", slave);
 	}
-	else if (SysUtil::getFileExtention(masterName) == "mp4" || SysUtil::getFileExtention(masterName) == "avi")
+	else if (SysUtil::getFileExtention(masterName) == "mp4" ||
+		SysUtil::getFileExtention(masterName) == "avi")
 		//TODO Something is wrong with this
 	{
-		cv::VideoCapture vc[2];
-		vc[0].open(masterName);
-		vc[1].open(slaveName);
+		FFVideoReader fvr[2];
 
-		int framesC = vc[0].get(cv::CAP_PROP_FRAME_COUNT);
+		fvr[0].init(masterName);
+		fvr[1].init(slaveName);
 
-		cv::Mat firstMaster;
-		vc[0] >> firstMaster;
-		cv::Mat firstSlave;
-		vc[1] >> firstSlave;
+
+		int framesC = fvr[0].getFrameCount();
+
+		cv::Mat firstMaster = fvr[0].readNext();
+		cv::Mat firstSlave = fvr[1].readNext();
 		cv::Size originSize = firstMaster.size();
 		StereoRectify sr;
 		sr.init(intname, extname, originSize);
@@ -93,27 +95,39 @@ int main(int argc, char* argv[])
 			cv::resize(firstMaster, firstMaster, originSize);
 			cv::resize(firstSlave, firstSlave, originSize);
 		}
-		cv::VideoWriter vw[2];
-		vw[0].open(inv ? "_slave.avi" : "_master.avi", CV_FOURCC('D', 'I', 'V', 'X'), 10, firstMaster.size());
-		vw[1].open(inv ? "_master.avi" : "_slave.avi", CV_FOURCC('D', 'I', 'V', 'X'), 10, firstSlave.size());
-		vw[0].write(firstMaster);
-		vw[1].write(firstSlave);
+		//cv::VideoWriter vw[2];
+		SKEncoder encoder[2];
+		encoder[0].init(framesC, firstMaster.size(), inv ? "_slave.h265" : "_master.h265", SKEncoder::FrameType::ABGR);
+		encoder[1].init(framesC, firstSlave.size(), inv ? "_master.h265" : "_slave.h265", SKEncoder::FrameType::ABGR);
 
-		cv::imwrite(inv ? "@VideoSample_slave.png" : "@VideoSample_master.png", firstMaster);
-		cv::imwrite(inv ? "@VideoSample_master.png" : "@VideoSample_slave.png", firstSlave);
+		{
+			cv::Mat tmp[2];
+			cv::cvtColor(firstMaster, tmp[0], cv::COLOR_RGB2RGBA);
+			cv::cvtColor(firstSlave, tmp[1], cv::COLOR_RGB2RGBA);
+			cv::cuda::GpuMat gtmp0(tmp[0]), gtmp1(tmp[1]);
+			encoder[0].encode(gtmp0.data, gtmp0.step);
+			encoder[1].encode(gtmp1.data, gtmp1.step);
+		}
+
+		{
+			cv::Mat tmp[2];
+			cv::cvtColor(firstMaster, tmp[0], cv::COLOR_RGB2BGR);
+			cv::cvtColor(firstSlave, tmp[1], cv::COLOR_RGB2BGR);
+			cv::imwrite(inv ? "@VideoSample_slave.png" : "@VideoSample_master.png", tmp[0]);
+			cv::imwrite(inv ? "@VideoSample_master.png" : "@VideoSample_slave.png", tmp[1]);
+		}
 
 		double stat = 0;
 		int lastFram = 0;
 		int currentTime = SysUtil::getCurrentTimeMicroSecond();
 		int lastTime = currentTime;
 
-#ifdef GPU_MODE
 		cv::cuda::GpuMat tmp_g[4];
 		tmp_g[0].upload(firstMaster);
 		tmp_g[1].upload(firstSlave);
 		tmp_g[2].create(tmp_g[0].size(), tmp_g[0].type());
 		tmp_g[3].create(tmp_g[1].size(), tmp_g[1].type());
-#endif // GPU_MODE
+
 		for (int fram = 0;; fram++)
 		{
 			if ((double)fram / framesC > stat)
@@ -125,12 +139,13 @@ int main(int argc, char* argv[])
 				lastFram = fram;
 				lastTime = currentTime;
 			}
-
+			//auto st = SKCommon::getCurrentTimeMicroSecond();
 			cv::Mat tmp[2];
 			bool brk = false;
 			for (int i = 0; i < 2; i++)
 			{
-				vc[i] >> tmp[i];
+				//vc[i] >> tmp[i];
+				tmp[i] = fvr[i].readNext();
 				if (tmp[i].empty())
 				{
 					brk = true;
@@ -139,33 +154,32 @@ int main(int argc, char* argv[])
 			}
 			if (brk)
 				break;
-#ifdef GPU_MODE
+			//SKCommon::infoOutput("Read from video cost %d ms", (SKCommon::getCurrentTimeMicroSecond() - st) / 1000);
+			//st = SKCommon::getCurrentTimeMicroSecond();
 			tmp_g[0].upload(tmp[0]);
 			tmp_g[1].upload(tmp[1]);
 			if (!inv)
 				sr.rectify(tmp_g[0], tmp_g[2], tmp_g[1], tmp_g[3], false);
 			else
 				sr.rectify(tmp_g[1], tmp_g[3], tmp_g[0], tmp_g[2], false);
-			tmp_g[2].download(tmp[0]);
-			tmp_g[3].download(tmp[1]);
-#else
-			if (!inv)
-				sr.rectify(tmp[0], tmp[1]);
-			else
-				sr.rectify(tmp[1], tmp[0]);
-#endif
-
+			//SKCommon::infoOutput("Upload & rectify cost %d ms", (SKCommon::getCurrentTimeMicroSecond() - st)/1000);
 			for (int i = 0; i < 2; i++)
 			{
+				cv::cuda::GpuMat t1, t2;
 				if (resize_origin)
-					cv::resize(tmp[i], tmp[i], originSize);
-				vw[i].write(tmp[i]);
+					cv::cuda::resize(tmp_g[i + 2], t1, originSize);
+				else
+					t1 = tmp_g[i + 2];
+				cv::cuda::cvtColor(t1, t2, cv::COLOR_RGB2RGBA);
+				encoder[i].encode(t2.data, t2.step);
 			}
 		}
 		for (int i = 0; i < 2; i++)
 		{
-			vc[i].release();
-			vw[i].release();
+			//vc[i].release();
+			fvr[i].release();
+			//vw[i].release();
+			encoder[i].endEncode();
 		}
 	}
 	else
