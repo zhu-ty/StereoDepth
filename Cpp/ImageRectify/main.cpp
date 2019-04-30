@@ -143,9 +143,9 @@ int main(int argc, char* argv[])
 			tmp_g[0].upload(tmp[0]);
 			tmp_g[1].upload(tmp[1]);
 			if (!inv)
-				sr.rectify(tmp_g[0], tmp_g[2], tmp_g[1], tmp_g[3]);
+				sr.rectify(tmp_g[0], tmp_g[2], tmp_g[1], tmp_g[3], false);
 			else
-				sr.rectify(tmp_g[1], tmp_g[3], tmp_g[0], tmp_g[2]);
+				sr.rectify(tmp_g[1], tmp_g[3], tmp_g[0], tmp_g[2], false);
 			tmp_g[2].download(tmp[0]);
 			tmp_g[3].download(tmp[1]);
 #else

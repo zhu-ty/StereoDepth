@@ -1378,20 +1378,25 @@ int StereoRectify::rectify(cv::Mat & leftImg, cv::Mat & rightImg) {
 	return 0;
 }
 
-int StereoRectify::rectify(cv::cuda::GpuMat & srcImg0, cv::cuda::GpuMat & dstImg0, cv::cuda::GpuMat & srcImg1, cv::cuda::GpuMat & dstImg1)
+int StereoRectify::rectify(cv::cuda::GpuMat & srcImg0, cv::cuda::GpuMat & dstImg0, cv::cuda::GpuMat & srcImg1, cv::cuda::GpuMat & dstImg1, bool autoResize)
 {
 	cv::cuda::remap(srcImg0, dstImg0, gpu_rmap[0][0], gpu_rmap[0][1], cv::INTER_LINEAR);
-	//std::cout << "cv::cuda::remap done" << std::endl;
 	cv::cuda::GpuMat tmp_dst0;
 	dstImg0(rect).copyTo(tmp_dst0);
-	//std::cout << "cv::cuda::GpuMat::copyTo done" << std::endl;
-	//std::cout << "size = " << tmp_dst0.cols << " " << tmp_dst0.rows << std::endl;
-	cv::cuda::resize(tmp_dst0, dstImg0, cv::Size(srcImg0.cols, srcImg0.rows));
-	//std::cout << "cv::cuda::resize done" << std::endl;
 
 	cv::cuda::remap(srcImg1, dstImg1, gpu_rmap[1][0], gpu_rmap[1][1], cv::INTER_LINEAR);
 	cv::cuda::GpuMat tmp_dst1;
 	dstImg1(rect).copyTo(tmp_dst1);
-	cv::cuda::resize(tmp_dst1, dstImg1, cv::Size(srcImg1.cols, srcImg1.rows));
+
+	if (autoResize)
+	{
+		cv::cuda::resize(tmp_dst0, dstImg0, cv::Size(srcImg0.cols, srcImg0.rows));
+		cv::cuda::resize(tmp_dst1, dstImg1, cv::Size(srcImg1.cols, srcImg1.rows));
+	}
+	else
+	{
+		tmp_dst0.copyTo(dstImg0);
+		tmp_dst1.copyTo(dstImg1);
+	}
 	return 0;
 }

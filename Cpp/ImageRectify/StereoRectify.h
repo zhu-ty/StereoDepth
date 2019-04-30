@@ -69,7 +69,7 @@ public:
 	@param cv::cuda::GpuMat & dstImg1: dst image 1
 	@return int
 	*/
-	int rectify(cv::cuda::GpuMat & srcImg0, cv::cuda::GpuMat & dstImg0, cv::cuda::GpuMat & srcImg1, cv::cuda::GpuMat & dstImg1);
+	int rectify(cv::cuda::GpuMat & srcImg0, cv::cuda::GpuMat & dstImg0, cv::cuda::GpuMat & srcImg1, cv::cuda::GpuMat & dstImg1, bool autoResize = true);
 private:
 	
 };
