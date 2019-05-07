@@ -66,8 +66,8 @@ int main(int argc, char* argv[])
 			cv::resize(master, master, originSize);
 			cv::resize(slave, slave, originSize);
 		}
-		cv::imwrite(inv ? "_slave.png" : "_master.png", master);
-		cv::imwrite(inv ? "_master.png" : "_slave.png", slave);
+		cv::imwrite("_master.png", master);
+		cv::imwrite("_slave.png", slave);
 	}
 	else if (SysUtil::getFileExtention(masterName) == "mp4" ||
 		SysUtil::getFileExtention(masterName) == "avi")
@@ -97,8 +97,8 @@ int main(int argc, char* argv[])
 		}
 		//cv::VideoWriter vw[2];
 		SKEncoder encoder[2];
-		encoder[0].init(framesC, firstMaster.size(), inv ? "_slave.h265" : "_master.h265", SKEncoder::FrameType::ABGR);
-		encoder[1].init(framesC, firstSlave.size(), inv ? "_master.h265" : "_slave.h265", SKEncoder::FrameType::ABGR);
+		encoder[0].init(framesC, firstMaster.size(), "_master.h265", SKEncoder::FrameType::ABGR);
+		encoder[1].init(framesC, firstSlave.size(), "_slave.h265", SKEncoder::FrameType::ABGR);
 
 		{
 			cv::Mat tmp[2];
@@ -113,8 +113,8 @@ int main(int argc, char* argv[])
 			cv::Mat tmp[2];
 			cv::cvtColor(firstMaster, tmp[0], cv::COLOR_RGB2BGR);
 			cv::cvtColor(firstSlave, tmp[1], cv::COLOR_RGB2BGR);
-			cv::imwrite(inv ? "@VideoSample_slave.png" : "@VideoSample_master.png", tmp[0]);
-			cv::imwrite(inv ? "@VideoSample_master.png" : "@VideoSample_slave.png", tmp[1]);
+			cv::imwrite("@VideoSample_master.png", tmp[0]);
+			cv::imwrite("@VideoSample_slave.png", tmp[1]);
 		}
 
 		double stat = 0;
